@@ -1,6 +1,7 @@
 package guru.springframework.config;
 
 import guru.springframework.examplebeans.FakeDataSource;
+import guru.springframework.examplebeans.FakeJmsBroker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -9,7 +10,15 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 
 @Configuration
-@PropertySource("classpath:datasource.properties")
+@PropertySource({"classpath:datasource.properties", "classpath:jms.properties"})
+// OR
+/*
+@PropertySources({
+
+                         @PropertySource("classpath:datasource.properties"),
+                         @PropertySource("classpath:jms.properties")
+                 })
+                  */
 public class PropertyConfig {
     @Autowired
     private Environment environment;
@@ -21,25 +30,32 @@ public class PropertyConfig {
     @Value("${guru.dburl}")
     private String dbUrl;
 
+    @Value("${guru.jms.username}")
+    private String jmsUserName;
+    @Value("${guru.jms.password}")
+    private String jmsPassword;
+    @Value("${guru.jms.dburl}")
+    private String jmsDbUrl;
+
     @Bean
     public FakeDataSource fakeDataSource() {
         FakeDataSource fakeDataSource = new FakeDataSource();
-        // fakeDataSource.setUsername(userName);
-        /*
-        I have created a system environment property with the name username
-        Go to the run configuration "DiDemoApplication"
-        Under the Environment -> Environment variable add a new variable an give it a value
-
-        Or
-        you cane just override the guru.username in the Environment variable
-        by adding GURU_USERNAME (low case works too but with dot didnot work) and give it a value
-         */
-        fakeDataSource.setUsername(environment.getProperty("username"));
-
+        fakeDataSource.setUsername(userName);
         fakeDataSource.setPassword(password);
         fakeDataSource.setUrl(dbUrl);
 
         return fakeDataSource;
+    }
+
+    @Bean
+    public FakeJmsBroker fakeJmsBroker() {
+        FakeJmsBroker fakeJmsBroker = new FakeJmsBroker();
+        fakeJmsBroker.setUsername(jmsUserName);
+
+        fakeJmsBroker.setPassword(jmsPassword);
+        fakeJmsBroker.setUrl(jmsDbUrl);
+
+        return fakeJmsBroker;
     }
 
     //Loading the properties does not need manual PropertySourcesPlaceholderConfigurer creation
